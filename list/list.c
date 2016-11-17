@@ -78,8 +78,11 @@ void *front(list *llist)
     /// @note you are returning the HEAD's DATA not the head node. Remember, the
     /// user should never deal with the list nodes.
     (void)llist;
+	if (llist == NULL)
+		return NULL; 
     if (!is_empty(llist)) {
-      return llist->head->data;
+      void* data = llist->head->data;
+      return data;
     }
     return NULL;
 }
@@ -98,6 +101,22 @@ void *get(list *llist, int index)
     /// @todo Implement changing the return value!
     (void)llist;
     (void)index;
+    if (!is_empty(llist)) {
+      		if (index < llist->size) {
+              node* current = llist->head;
+              int count = 0;
+              while (count < index) {
+                if (current->next != NULL) {
+                  current = current->next;
+                } else {
+                  break;
+                }
+                count += 1;
+              }
+              void* data = current->data;
+              return data;
+          }
+  	}
     return NULL;
 }
 
@@ -122,32 +141,39 @@ bool add(list *llist, int index, void *data)
     (void) llist;
     (void) index;
     (void) data;
-    int count = 0;
-    if (index <= (llist->size + 1)) {
 
-        if (!is_empty(llist)) {
-            node* cur_node = llist->head;
-            while (count < index) {
-                cur_node = cur_node->next;
-                count += 1;
-            }
-            if (cur_node->next == NULL) {
-                cur_node->next = create_node(data);
-                llist->size += 1;
-                return 1;
-            } else {
-                node* temp_node = create_node(data);
-                temp_node->next = cur_node->next;
-                cur_node->next = temp_node;
-                llist->size += 1;
-                return 1;
-            }
-        } else {
-            llist->head = create_node(data);
-            llist->size += 1;
-            return 1;
-        }
-    }
+	if (index < llist->size+1) {
+		if (!is_empty(llist)) {
+
+			node* current = llist->head;
+			node* previous = NULL;
+			int ix = 0;
+			while ((ix-index) < 0) {
+				
+				previous = current;
+				current = previous->next;
+				ix += 1;
+				
+			}
+			if (previous == NULL) {
+				node* temp = create_node(data);
+				temp->next = current;
+				llist->head = temp;
+				return 1;
+			} else {
+				node* temp = create_node(data);
+				temp->next = current;
+				previous->next = temp;
+				llist->size += 1;
+				return 1;
+			}	
+		} else {
+			llist->head = create_node(data);
+			llist->size += 1;
+			return 1;
+		}
+	}
+
 return NULL;
 }
 
@@ -174,16 +200,17 @@ void *list_remove(list *llist, int index)
         current = current->next;
         i += 1;
       }
-      llist->size -= 1;
       if(previous == NULL) {
         void* data = current->data;
-        llist->head = llist->head->next;
-        free(current);
+        llist->head = llist->head->next;    
+	free(current);
+	llist->size -= 1;
         return data;
       }
       void* data = current->data;
       previous->next = current->next;
       free(current);
+	llist->size -= 1;
       return data;
     }
     return NULL;
@@ -207,8 +234,9 @@ void push_front(list *llist, void *data)
       llist->head = create_node(data);
       llist->size += 1;
     } else {
-      llist->head->next = llist->head;
+      node* hhead = llist->head;
       llist->head = create_node(data);
+      llist->head->next = hhead;
       llist->size += 1;
     }
 }
@@ -224,6 +252,8 @@ void *pop_front(list *llist)
 {
     /// @todo Implement
     (void) llist;
+	if (llist == NULL)
+		return NULL; 
     if (!is_empty(llist)) {
       node* head = llist->head;
       void* data = llist->head->data;
@@ -263,6 +293,8 @@ void *contains(list *llist, void *data, list_eq eq_func) {
     (void) llist;
     (void) data;
     (void) eq_func;
+	if (llist == NULL | data == NULL | eq_func == NULL)
+		return NULL; 
     node* current = llist->head;
     while (!(eq_func(data, current->data) == 0)) {
       if (current->next != NULL) {
@@ -299,6 +331,19 @@ list* copy_list(list *llist, list_copy copy_func)
     /// @todo implement
     (void)llist;
     (void) copy_func;
+	list* copy_llist = create_list();
+	if (!(llist == NULL)) {
+		int ix = 0;
+		node* current = llist->head;
+		add(copy_llist, ix, copy_func(current->data)); 
+		ix += 1;
+		while (ix < llist->size) {
+			current = current->next;
+			add(copy_llist, ix, copy_func(current->data));
+			ix += 1;
+		}
+		return copy_llist;
+	}
     return NULL;
 }
 
@@ -313,6 +358,8 @@ int size(list *llist)
 {
     ///@note simply return the size of the list. It's that easy!
     (void)llist;
+	if (llist == NULL)
+		return NULL; 
     return llist->size;
 }
 
@@ -339,7 +386,31 @@ list *split_list(list *llist, list_pred pred_func)
     /// @todo add the removed elements to the new list
     (void) llist;
     (void) pred_func;
-    return NULL;
+
+	list *rlist = create_list();
+	int lsize = llist->size;
+	int ix = 0;
+	int lindex = 0;
+	int rindex = 0;
+	if (!is_empty(llist)) {
+		node* current = llist->head; 
+		node* next = NULL;
+		while (ix < lsize) {
+			next = current->next;
+			if (pred_func(current->data)) {
+				push_front(rlist, list_remove(llist, lindex)); 
+				rindex += 1;
+				lindex = lindex;
+			} else {
+				lindex += 1;
+				rindex = rindex;
+			}
+			current = next;
+			ix += 1;
+		}  
+	}
+
+    return rlist;
 }
 
 /** is_empty
@@ -353,6 +424,8 @@ int is_empty(list *llist)
 {
     /// @note an empty list should have a size of zero and head points to NULL.
     (void) llist;
+	if (llist == NULL)
+		return NULL; 
     if (llist->head == NULL && llist->size == 0) {
       return 1;
     }
@@ -374,6 +447,11 @@ void empty_list(list *llist, list_op free_func)
     /// @note do not free the list structure itself.
     (void) llist;
     (void) free_func;
+	int limit = llist->size;
+
+	for (int ix = limit-1; ix >= 0; ix--) {
+		free_func(list_remove(llist, ix)); 
+	}
 }
 
 /** traverse

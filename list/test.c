@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
 /* Here we are going to write some functions to support a list that stores
  * person data (name, age)
  */
@@ -75,6 +74,9 @@ int is_age_50(const void *data) {
 // Tell if a person is 23 or older
 int is_age_23_or_greater(const void *data) {
 	struct person *p = (struct person*) data;
+	#ifdef DEBUG 
+	printf("\t AGE %d\n", p->age);
+	#endif
 	return p->age >= 23;
 }
 
