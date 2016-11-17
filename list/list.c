@@ -8,7 +8,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include "list.h"
 
 /* The node struct. Has a next pointer, and data. */
@@ -41,10 +40,12 @@ static node* create_node(void* data)
 {
     /// @todo Implement changing the return value!
     (void)data;
+	
 	node* nnode = (node*) malloc(sizeof(node));
 	nnode->next = NULL;
 	nnode->data = data;
-  return nnode;
+ 
+	return nnode;
 }
 
 /** create_list
@@ -58,10 +59,12 @@ list* create_list(void)
 {
     /// @todo Implement changing the return value!
     (void)create_node;
-    list *llist = (list*) malloc(sizeof(list));
-    llist->head = NULL;
-    llist->size = 0;
-    return llist;
+    
+	list *llist = (list*) malloc(sizeof(list));
+	llist->head = NULL;
+	llist->size = 0;
+	
+	return llist;
 }
 
 /** front
@@ -78,13 +81,16 @@ void *front(list *llist)
     /// @note you are returning the HEAD's DATA not the head node. Remember, the
     /// user should never deal with the list nodes.
     (void)llist;
-	if (llist == NULL)
+	if (llist == NULL) {
 		return NULL; 
-    if (!is_empty(llist)) {
-      void* data = llist->head->data;
-      return data;
-    }
-    return NULL;
+	}
+
+	if (!is_empty(llist)) {
+		void* data = llist->head->data;
+		return data;
+	}
+	
+	return NULL;
 }
 
 /** get
@@ -101,23 +107,27 @@ void *get(list *llist, int index)
     /// @todo Implement changing the return value!
     (void)llist;
     (void)index;
-    if (!is_empty(llist)) {
-      		if (index < llist->size) {
-              node* current = llist->head;
-              int count = 0;
-              while (count < index) {
-                if (current->next != NULL) {
-                  current = current->next;
-                } else {
-                  break;
-                }
-                count += 1;
-              }
-              void* data = current->data;
-              return data;
-          }
-  	}
-    return NULL;
+
+	if ((llist == NULL) || (index < 0) || (index >= llist->size)) {
+		return NULL; 
+	}
+	if (!is_empty(llist)) {
+		if (index < llist->size) {
+			node* current = llist->head;
+			int count = 0;
+			while (count < index) {
+				if (current->next != NULL) {
+				  current = current->next;
+				} else {
+				  break;
+				}
+				count += 1;
+			}
+			void* data = current->data;
+			return data;
+		}
+	}
+	return NULL;
 }
 
 /** add
@@ -141,6 +151,10 @@ bool add(list *llist, int index, void *data)
     (void) llist;
     (void) index;
     (void) data;
+	
+	if ((llist == NULL) || (index < 0) || (data == NULL)) {
+		return NULL;
+	}
 
 	if (index < llist->size+1) {
 		if (!is_empty(llist)) {
@@ -174,7 +188,7 @@ bool add(list *llist, int index, void *data)
 		}
 	}
 
-return NULL;
+	return NULL;
 }
 
 /** list_remove
@@ -192,28 +206,37 @@ void *list_remove(list *llist, int index)
     (void) llist;
     (void) index;
     int i = 0;
-    if (!is_empty(llist)) {
-      node* previous = NULL;
-      node* current = llist->head;
-      while ((index-i) > 0) {
-        previous = current;
-        current = current->next;
-        i += 1;
-      }
-      if(previous == NULL) {
-        void* data = current->data;
-        llist->head = llist->head->next;    
-	free(current);
-	llist->size -= 1;
-        return data;
-      }
-      void* data = current->data;
-      previous->next = current->next;
-      free(current);
-	llist->size -= 1;
-      return data;
-    }
-    return NULL;
+
+	if ((llist == NULL) || (index < 0) || (index >= llist->size)) {
+		return NULL; 
+	} 
+
+	if (!is_empty(llist)) {
+		node* previous = NULL;
+		node* current = llist->head;
+		while ((index-i) > 0) {
+			previous = current;
+			current = current->next;
+			i += 1;
+		}
+
+		if(previous == NULL) {
+			void* data = current->data;
+			llist->head = llist->head->next;    
+			free(current);
+			llist->size -= 1;
+			return data;
+		}
+	
+		void* data = current->data;
+		previous->next = current->next;
+		free(current);
+		llist->size -= 1;
+
+		return data;
+	}
+	
+	return NULL;
 }
 
 /** push_front
@@ -229,16 +252,19 @@ void push_front(list *llist, void *data)
     (void) llist;
     (void) data;
 
-    // IF empty
-    if (is_empty(llist)) {
-      llist->head = create_node(data);
-      llist->size += 1;
-    } else {
-      node* hhead = llist->head;
-      llist->head = create_node(data);
-      llist->head->next = hhead;
-      llist->size += 1;
-    }
+	if ((llist == NULL) || (data == NULL)) {
+		return;
+	}
+
+	if (is_empty(llist)) {
+		llist->head = create_node(data);
+		llist->size += 1;
+	} else {
+		node* hhead = llist->head;
+		llist->head = create_node(data);
+		llist->head->next = hhead;
+		llist->size += 1;
+	}
 }
 
 /** pop_front
@@ -254,15 +280,17 @@ void *pop_front(list *llist)
     (void) llist;
 	if (llist == NULL)
 		return NULL; 
-    if (!is_empty(llist)) {
-      node* head = llist->head;
-      void* data = llist->head->data;
-      llist->head = llist->head->next;
-      llist->size -= 1;
-      free(head);
-      return data;
-    }
-    return NULL;
+	
+	if (!is_empty(llist)) {
+		node* head = llist->head;
+		void* data = llist->head->data;
+		llist->head = llist->head->next;
+		llist->size -= 1;
+		free(head);
+		return data;
+	}
+	
+	return NULL;
 }
 
 /** contains
@@ -293,23 +321,25 @@ void *contains(list *llist, void *data, list_eq eq_func) {
     (void) llist;
     (void) data;
     (void) eq_func;
-	if ((llist == NULL) | (data == NULL) | (eq_func == NULL)) {
+
+	if ((llist == NULL) || (data == NULL) || (eq_func == NULL)) {
 		return NULL;
 	}
-    node* current = llist->head;
-    while (!(eq_func(data, current->data) == 0)) {
-      if (current->next != NULL) {
-        current = current->next;
-      } else {
-        break;
-      }
-    }
+	
+	node* current = llist->head;
+	while (!(eq_func(data, current->data) == 0)) {
+		if (current->next != NULL) {
+		current = current->next;
+		} else {
+		break;
+		}
+	}
 
-    if (eq_func(data, current->data) == 0) {
-      return current->data;
-    }
+	if (eq_func(data, current->data) == 0) {
+		return current->data;
+	}
 
-    return NULL;
+	return NULL;
 }
 
 /** copy_list
@@ -365,7 +395,7 @@ int size(list *llist)
 	if (llist == NULL) {
 		return 0;
 	}
-    return llist->size;
+	return llist->size;
 }
 
 /** split_list
@@ -432,10 +462,10 @@ int is_empty(list *llist)
 	if (llist == NULL) {
 		return 0; 
 	} 
-    if (llist->head == NULL && llist->size == 0) {
-      return 1;
-    }
-    return 0;
+	if (llist->head == NULL && llist->size == 0) {
+		return 1;
+	}
+	return 0;
 }
 
 /** empty_list
@@ -453,6 +483,10 @@ void empty_list(list *llist, list_op free_func)
     /// @note do not free the list structure itself.
     (void) llist;
     (void) free_func;
+	if ((llist == NULL) || (free_func == NULL)) {
+		return;
+	}
+
 	int limit = llist->size;
 
 	for (int ix = limit-1; ix >= 0; ix--) {
@@ -472,12 +506,15 @@ void traverse(list *llist, list_op do_func)
     /// @todo Implement
     (void) llist;
     (void) do_func;
-    if (!is_empty(llist)) {
-      node* current = llist->head;
-      while (current->next != NULL) {
-        do_func(current->data);
-        current = current->next;
-      }
-      do_func(current->data);
-    }
+	if ((llist == NULL) || (do_func == NULL)) {
+		return;
+	}
+	if (!is_empty(llist)) {
+		node* current = llist->head;
+		while (current->next != NULL) {
+			do_func(current->data);
+			current = current->next;
+		}
+		do_func(current->data);
+	}
 }
