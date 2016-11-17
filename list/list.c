@@ -293,8 +293,9 @@ void *contains(list *llist, void *data, list_eq eq_func) {
     (void) llist;
     (void) data;
     (void) eq_func;
-	if (llist == NULL | data == NULL | eq_func == NULL)
-		return NULL; 
+	if ((llist == NULL) | (data == NULL) | (eq_func == NULL)) {
+		return NULL;
+	}
     node* current = llist->head;
     while (!(eq_func(data, current->data) == 0)) {
       if (current->next != NULL) {
@@ -331,6 +332,9 @@ list* copy_list(list *llist, list_copy copy_func)
     /// @todo implement
     (void)llist;
     (void) copy_func;
+	if ((llist == NULL) | (copy_func == NULL)) {
+		return NULL; 
+	}
 	list* copy_llist = create_list();
 	if (!(llist == NULL)) {
 		int ix = 0;
@@ -358,8 +362,9 @@ int size(list *llist)
 {
     ///@note simply return the size of the list. It's that easy!
     (void)llist;
-	if (llist == NULL)
-		return NULL; 
+	if (llist == NULL) {
+		return 0;
+	}
     return llist->size;
 }
 
@@ -424,8 +429,9 @@ int is_empty(list *llist)
 {
     /// @note an empty list should have a size of zero and head points to NULL.
     (void) llist;
-	if (llist == NULL)
-		return NULL; 
+	if (llist == NULL) {
+		return 0; 
+	} 
     if (llist->head == NULL && llist->size == 0) {
       return 1;
     }
